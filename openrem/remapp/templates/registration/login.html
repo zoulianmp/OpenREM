@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block headextras %}
+    <!-- Custom styles for registration template -->
+    <link href="{{ STATIC_URL }}css/registration.css" rel="stylesheet">
+{% endblock %}
+
+{% block loginlink %}
+{% endblock %}
+
+
+{% block mainblock %}
+
+
+
+
+
+
+    <div class="container">
+
+      <form class="form-signin" role="form"  method="post" action=".">
+        {% csrf_token %}
+        <h2 class="form-signin-heading">Please sign in</h2>
+        {% if form.errors %}
+        <p>Your username and password didn't match. Please try again.</p>
+        {% endif %}
+        <input type="text" class="form-control" placeholder="User name" id="username" name="username" required autofocus>
+        <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+      {% else %}
+        <input type="hidden" name="next" value="/openrem/auth/" />
+      {% endif %}
+      </form>
+
+    </div> <!-- /container -->
+
+
+
+
+{% endblock %}

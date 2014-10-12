@@ -1,0 +1,14 @@
+Change the version number in docs/conf.py, setup.py and in the install instructions in the release notes where applicable
+
+Clean the existing distribute folder:
+	rm -r *
+
+Then get the new contents:
+rsync -av --exclude-from='../bbOpenREM/stuff/distexclude.txt' ../bbOpenREM/ .
+
+Change settings name:
+	mv openrem/openremproject/wsgi.py{,.example}
+
+Build:
+	python setup.py sdist
+

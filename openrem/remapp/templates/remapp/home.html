@@ -1,0 +1,86 @@
+{% extends "remapp/base.html" %}
+
+      {% block toprow %}
+      <h1><img src="{{ STATIC_URL }}img/openrem0055.png" height="55" width="55" class="openrem-logo">OpenREM database browser and export</h1>
+
+      <p>
+          There are {{ homedata.total }} studies in this database. Page last refreshed on {% now "jS F Y \a\t H:i" %}.
+      </p>
+      {% endblock %}
+
+
+      {% block mainblock %}
+{% load humanize %}
+
+<table class="table table-bordered">
+    <tr>
+        <th><a href="/openrem/ct/">CT</a></th><th><a href="/openrem/rf/">Fluoroscopy</a></th><th><a href="/openrem/mg/">Mammography</a></th>
+    </tr>
+    <tr>
+        <td>{{ homedata.ct }}</td><td>{{ homedata.rf }}</td><td>{{ homedata.mg }}</td>
+    </tr>
+</table>
+
+<h4>CT summary table</h4>
+<table class="table table-bordered">
+    <tr>
+        <th>Station name</th><th>Number of studies</th><th>Latest study</th>
+    </tr>
+    {% for key,value in homedata.CT.items %}
+        <tr>
+            <td>
+                {{ value.institution }} (<a href="/openrem/ct/?station_name={{ key }}&o=-study_date">{{ key }}</a>)
+            </td>
+            <td>
+                {{ value.total }}
+            </td>
+            <td>
+                {{ value.latest|naturaltime }}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h4>Fluoroscopy summary table</h4>
+<table class="table table-bordered">
+    <tr>
+        <th>Station name</th><th>Number of studies</th><th>Latest study</th>
+    </tr>
+    {% for key,value in homedata.RF.items %}
+        <tr>
+            <td>
+                {{ value.institution }} (<a href="/openrem/rf/?station_name={{ key }}&o=-study_date">{{ key }}</a>)
+            </td>
+            <td>
+                {{ value.total }}
+            </td>
+            <td>
+                {{ value.latest|naturaltime }}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h4>Mammography summary table</h4>
+<table class="table table-bordered">
+    <tr>
+        <th>Station name</th><th>Number of studies</th><th>Latest study</th>
+    </tr>
+    {% for key,value in homedata.MG.items %}
+        <tr>
+            <td>
+                {{ value.institution }} (<a href="/openrem/mg/?station_name={{ key }}&o=-study_date">{{ key }}</a>)
+            </td>
+            <td>
+                {{ value.total }}
+            </td>
+            <td>
+                {{ value.latest|naturaltime }}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+
+
+{% endblock %}	

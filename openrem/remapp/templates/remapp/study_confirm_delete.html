@@ -1,0 +1,60 @@
+{% extends "remapp/base.html" %}
+
+
+{% block mainblock %}		
+
+<form method="post">{% csrf_token %}
+
+<table class="table table-striped">
+        <th>Institution</th><th>Make | Model | Station name</th><th>Date</th>
+{% if exam.modality_type = "CT" %}
+        <th>Study description | Accession number</th><th>Number of events</th><th>Dose Length Product Total mGy.cm</th>
+{% elif exam.modality_type = "RF" %}
+        <th>Study description | Accession number</th><th>Number of events</th><th>DAP Total cGy.cm2</th><th>Dose at RP total Gy</th><th>Physician</th>
+{% elif exam.modality_type = "MG" %}
+        <th>Protocol | Accession number</th><th>Number of events</th><th>Laterality</th><th>Accumulated AGD (mGy)</th>
+{% endif %}
+        <tr>
+            <td>{{ exam.general_equipment_module_attributes_set.get.institution_name }}</td>
+            <td>
+                {{ exam.general_equipment_module_attributes_set.get.manufacturer }} |
+                {{ exam.general_equipment_module_attributes_set.get.manufacturer_model_name }} |
+                {{ exam.general_equipment_module_attributes_set.get.station_name }}        
+            </td>
+            <td>{{ exam.study_date|date:"Y-m-d" }} {{ exam.study_time|date:"H:i" }}</td>
+{% if exam.modality_type = "CT" %}
+            <td>
+                <a href="/openrem/ct/{{ exam.id }}/">{{ exam.study_description }}</a> |
+                {{ exam.accession_number }} |
+                {{ exam.patient_study_module_attributes_set.get.patient_size|floatformat:0 }} cm |
+                {{ exam.patient_study_module_attributes_set.get.patient_weight|floatformat:0 }} kg
+            </td>
+            <td>{{ exam.ct_radiation_dose_set.get.ct_accumulated_dose_data_set.get.total_number_of_irradiation_events }}</td>
+            <td>{{ exam.ct_radiation_dose_set.get.ct_accumulated_dose_data_set.get.ct_dose_length_product_total|floatformat:2 }}</td>
+{% elif exam.modality_type = "RF" %}
+            <td>
+                <a href="/openrem/rf/{{ exam.id }}/">{{ exam.study_description }}</a> |
+                {{ exam.accession_number }}
+            </td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.irradiation_event_xray_data_set.count }}</td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.accumulated_xray_dose_set.get.accumulated_projection_xray_dose_set.get.convert_gym2_to_cgycm2|floatformat:1 }}</td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.accumulated_xray_dose_set.get.accumulated_projection_xray_dose_set.get.dose_rp_total|floatformat:6 }}</td>
+            <td>{{ exam.performing_physician_name }}</td>
+{% elif exam.modality_type = "MG" %}
+            <td>
+                <a href="/openrem/mg/{{ exam.id }}/">{{ exam.procedure_code_meaning }}</a> |
+                {{ exam.accession_number }}
+            </td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.irradiation_event_xray_data_set.count }}</td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.accumulated_xray_dose_set.get.accumulated_mammography_xray_dose_set.get.laterality }}</td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.accumulated_xray_dose_set.get.accumulated_mammography_xray_dose_set.get.accumulated_average_glandular_dose }}</td>
+{% endif %}
+        </tr>
+</table>
+
+    Are you sure you want to delete the above study with UID {{ exam }}?
+    <input type="submit" value="Delete" />
+</form>
+
+
+{% endblock %}	

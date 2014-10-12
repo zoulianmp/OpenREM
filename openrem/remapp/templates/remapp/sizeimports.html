@@ -1,0 +1,119 @@
+{% extends "remapp/base.html" %}
+
+
+{% block headextras %}
+{% if current %}
+<meta http-equiv="refresh" content="5" />
+{% endif %}
+{% endblock %}
+
+
+{% block navbar %}
+            <li><a href="/openrem/ct">CT</a></li>
+            <li><a href="/openrem/rf">Fluoroscopy</a></li>
+            <li><a href="/openrem/mg">Mammography</a></li>
+{% endblock %}
+
+{% block adminnav %}
+            <li class="dropdown active"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-blank fa-fw"></i>Admin <b class="caret"></b></a>
+{% endblock %}
+
+
+
+{% block mainblock %}		
+   {% load humanize %}
+   {% load remappduration %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.level == 40 %}danger{% elif message.level == 25 %}success{% endif %} fade in">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                {% if message.level == 40 %}
+                    <strong>Warning!</strong>
+                {% endif %}
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+{% if admin.adminperm %}
+
+    {% if current %}
+    <h4>Import tasks in progress</h4>
+    <table class="table table-striped">
+        <th>Filename</th><th>Import started</th><th>Progress</th><th></th>
+        {% for tsk in current %}
+        <tr>
+            <td>{{ tsk.sizefile.name }}</td>
+            <td>{{ tsk.import_date|naturaltime }}</td>
+            <td>{{ tsk.progress }}</td>
+            <td><a href="/openrem/admin/sizeimport/abort/{{ tsk.pk }}" class="btn btn-danger">Abort</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if errors %}
+    <h4>Import tasks in an error state</h4>
+    <table class="table table-striped">
+        <th>Filename</th><th>Import started</th><th>Error message</th><th></th>
+        {% for tsk in errors %}
+        <tr>
+            <td>{{ tsk.sizefile.name }}</td>
+            <td>{{ tsk.import_date|naturaltime }}</td>
+            <td>{{ tsk.progress }}</td>
+            <td><a href="/openrem/admin/sizeimport/abort/{{ tsk.pk }}" class="btn btn-default">Delete import</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    <h4>Completed import tasks</h4>
+    <form action="/openrem/admin/sizedelete/" method="POST">
+    {% csrf_token %} 
+    <table class="table table-striped">
+        <th>Import started</th><th>Import time</th><th>No. rows</th><th>Download logfile</th><th>Delete?</th>
+        {% for tsk in complete %}
+        <tr>
+            <td>{{ tsk.import_date|naturaltime }}</td>
+            <td>{{ tsk.processtime|naturalduration }}</td>
+            <td>{{ tsk.num_records }}</td>
+            <td><a href="/openrem/download/{{ tsk.logfile }}">Download</a></a></td>
+            <td>
+                <div class = "checkbox">
+                    <label>
+                        <input type="checkbox" name="tsk{{ tsk.task_id }}" value="{{ tsk.task_id }}">
+                    </label>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="4"></td>
+            <td>
+            {% if complete.count > 0 %}
+                <button type="submit" class = "btn btn-default">Delete</button>
+            {% endif %}
+            </td>
+        </tr>
+    </table>
+    </form>
+    
+{% else %}
+
+      <div class="row col-md-offset-2">
+        <h3>Uploading patient size data to OpenREM</h3>
+      </div>
+
+      <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+      <p>
+        This function can only be accessed if you are logged in to OpenREM with admin
+        permissions.
+      </p>
+      </div>
+      </div>
+      
+{% endif %}
+
+{% endblock %}	

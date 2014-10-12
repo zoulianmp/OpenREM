@@ -1,0 +1,33 @@
+{% extends "remapp/base.html" %}
+
+
+    {% block headextras %}
+    <!-- Bootstrap-datepicker CSS -->
+    <!-- Bootstrap-datepicker JavaScript
+    ================================================== -->
+     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datepicker3.css">
+    
+    <script src="{{ STATIC_URL }}js/jquery-1.11.0.min.js"></script>
+  
+     <script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
+    {% block headscript %}
+    {% endblock %}
+    {% endblock %}
+
+
+      {% block mainblock %}
+      <div class="row">
+        <div class="col-md-9">
+          {% block col1 %}
+          {% endblock %}
+        </div>
+        <div class="col-md-3">
+          {% block col2 %}
+          {% endblock %}
+        </div>
+      </div>
+      {% endblock %}
+
+
+    {% block jsblock %}
+    {% endblock %}

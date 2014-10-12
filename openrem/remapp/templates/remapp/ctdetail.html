@@ -1,0 +1,107 @@
+{% extends "remapp/base.html" %}
+
+{% block navbar %}
+            <li class="active"><a href="/openrem/ct">CT</a></li>
+            <li><a href="/openrem/rf">Fluoroscopy</a></li>
+            <li><a href="/openrem/mg">Mammography</a></li>
+{% endblock %}
+
+
+{% block mainblock %}		
+<h1>Detail list of events</h1>
+
+<ul>
+    <li>Accession number: {{ general_study_module_attributes.accession_number }}</li>
+    <li>Study date: {{ general_study_module_attributes.study_date }}</li>
+    <li>Study time: {{ general_study_module_attributes.study_time }}</li>
+    <li>Study description: {{ general_study_module_attributes.study_description }}</li>
+    <li>Requested procedure: {{ general_study_module_attributes.requested_procedure_code_meaning }}</li>
+    <li>Patient age: {{ general_study_module_attributes.patient_study_module_attributes_set.get.patient_age_decimal|floatformat:1 }}</li>
+    <li>Patient height and weight: {{ general_study_module_attributes.patient_study_module_attributes_set.get.patient_size|floatformat:0 }} cm, {{ general_study_module_attributes.patient_study_module_attributes_set.get.patient_weight|floatformat:1 }} kg</li>
+    <li>Hospital: {{ general_study_module_attributes.general_equipment_module_attributes_set.get.institution_name }}</li>
+    <li>
+        Scanner: 
+        {{ general_study_module_attributes.general_equipment_module_attributes_set.get.manufacturer }} |
+        {{ general_study_module_attributes.general_equipment_module_attributes_set.get.manufacturer_model_name }} |
+        {{ general_study_module_attributes.general_equipment_module_attributes_set.get.station_name }}        
+    </li>
+    <li>Study UID: {{ general_study_module_attributes.study_instance_uid }}</li>
+    <li>Comment: {{ general_study_module_attributes.ct_radiation_dose_set.get.comment }} </li>
+    <li>Test patient indicators? {{ general_study_module_attributes.patient_module_attributes_set.get.not_patient_indicator }}</li>
+</ul>
+
+<table class="table table-striped table-bordered">
+    <th>Acquisition protocol</th>
+    <th>Type</th>
+    <th>CTDIvol mGy</th>
+    <th>DLP mGy.cm</th>
+    <th>Scanning length (mm)</th>
+    <th>kVp</th>
+    <th>mA</th>
+    <th>Max mA</th>
+    <th>Exposure time per rotation (s)</th>
+    <th>Pitch</th>
+    <th>Exposure time (s)</th>
+    <th>Slice thickness (mm)</th>
+    <th>Collimation (mm)</th>
+    <th>X-ray modulation type</th>
+    {% for event in general_study_module_attributes.ct_radiation_dose_set.get.ct_irradiation_event_data_set.all %}
+        {% for source in event.ct_xray_source_parameters_set.all %}
+            {% if source.identification_of_the_xray_source != "B" %}
+                <tr>
+                    <td rowspan="2">{{ event.acquisition_protocol }}</td>
+                    <td rowspan="2">{{ event.ct_acquisition_type }}</td>
+                    <td rowspan="2">{{ event.mean_ctdivol|floatformat:2 }}</td>
+                    <td rowspan="2">{{ event.dlp|floatformat:2 }}</td>        
+                    <td rowspan="2">{{ event.scanning_length_set.get.scanning_length|floatformat:0 }}</td>
+                    {% if event.number_of_xray_sources < 2 %}
+                        <td rowspan="2">{{ source.kvp|floatformat:0 }}</td>
+                        <td rowspan="2">{{ source.xray_tube_current|floatformat:0 }}</td>
+                        <td rowspan="2">{{ source.maximum_xray_tube_current|floatformat:0 }}</td>
+                        <td rowspan="2">{{ source.exposure_time_per_rotation|floatformat:3 }}</td>
+                    {% else %}
+                        <td>{{ source.kvp|floatformat:0 }}</td>
+                        <td>{{ source.xray_tube_current|floatformat:0 }}</td>
+                        <td>{{ source.maximum_xray_tube_current|floatformat:0 }}</td>
+                        <td>{{ source.exposure_time_per_rotation|floatformat:3 }}</td>
+                    {% endif %}
+                    <td rowspan="2">{{ event.pitch_factor }}</td>
+                    <td rowspan="2">{{ event.exposure_time|floatformat:3 }}</td>
+                    <td rowspan="2">{{ event.nominal_single_collimation_width|floatformat:3 }}</td>
+                    <td rowspan="2">{{ event.nominal_total_collimation_width|floatformat:2 }}</td>
+                    <td rowspan="2">{{ event.xray_modulation_type }}</td>
+                </tr>
+                {% if event.number_of_xray_sources < 2 %}
+                    <tr></tr>
+                {% endif %}
+            {% else %}
+                <tr>
+                    <td>{{ source.kvp|floatformat:0 }}</td>
+                    <td>{{ source.xray_tube_current|floatformat:0 }}</td>
+                    <td>{{ source.maximum_xray_tube_current|floatformat:0 }}</td>
+                    <td>{{ source.exposure_time_per_rotation|floatformat:3 }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        {% if event.comment != "" %}
+        <tr>
+            <td colspan="14"><strong>Comment</strong> {{ event.comment }}</td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+
+
+{% if is_paginated %}
+<p class="pagination">
+    {% if has_next %}
+    <a class="older" href="?page={{ next }}" title="View older posts">Older</a>
+    {% endif %}
+    {% if has_next and has_previous %} | {% endif %}
+    {% if has_previous %}
+    <a class="newer" href="?page={{ previous }}" title="View newer posts">Newer</a>
+    {% endif %}
+</p>
+{% endif %}
+
+{% endblock %}	

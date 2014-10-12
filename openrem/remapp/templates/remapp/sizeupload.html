@@ -1,0 +1,125 @@
+{% extends "remapp/base.html" %}
+
+
+
+{% block navbar %}
+            <li><a href="/openrem/ct">CT</a></li>
+            <li><a href="/openrem/rf">Fluoroscopy</a></li>
+            <li><a href="/openrem/mg">Mammography</a></li>
+{% endblock %}
+
+{% block adminnav %}
+            <li class="dropdown active"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-blank fa-fw"></i>Admin <b class="caret"></b></a>
+{% endblock %}
+
+
+
+{% block mainblock %}		
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.level == 40 %}danger{% elif message.level == 25 %}success{% endif %} fade in">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                {% if message.level == 40 %}
+                    <strong>Warning!</strong>
+                {% endif %}
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+{% if admin.adminperm %}
+
+      <div class="row col-md-offset-2">
+        <h1>Uploading patient size data to OpenREM</h1>
+      </div>
+
+      <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+      <p>
+        In most instances, dose metrics from the modalities make much more
+        sense when reviewed in conjunction with patient size. This interface
+        allows you to upload a csv file containing patient size information
+        that can then be imported to the existing data in the database.
+      </p>
+      <h4>
+        What needs to be in the csv file?
+      </h4>
+      <p>
+        The csv file needs to contain a column for each of the
+        following, with a column title in the first row. The columns can
+        be in any order; additional columns will be ignored:
+      </p>
+      </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 col-md-offset-2">
+        <ul>
+            <li>Patient hight</li>
+            <li>Patient weight</li>
+            <li>Study identifier*</li>
+            <li>Study identifier type*</li>
+        </ul>
+        </div>
+        <div class="col-md-4">
+          <p>
+             * The study identifier can be either the accession number or 
+             the Study Instance UID. The column titles can be anything, and
+             there can be as many other columns as you like.
+          </p>
+        </div>
+      </div>
+
+		<!-- Upload form. Note enctype attribute! -->
+		<form action="{% url "size_upload" %}" method="post" enctype="multipart/form-data" role="form">
+			{% csrf_token %}
+            <div class="row">
+                <p>{{ form.non_field_errors }}</p>
+                <div class="col-md-4 col-md-offset-4 form-group">
+                    {{ form.sizefile.label_tag }}
+                    {{ form.sizefile.errors }}
+                    {{ form.sizefile }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <button type="submit" class="btn btn-default">Upload csv to be processed</button>
+                </div>
+            </div>
+		</form>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+      <h4>Notes:</h4>
+      <p>
+          If you have a csv file with weight but not height or vice-versa, just add a
+          column header to a blank column to suit.
+      </p>
+      <p>
+          Data already in the database does not get overwritten. So if
+          a study already has a height or weight, or if the same study identifier
+          is used more than once in the csv file on different roles, only the
+          first entry is used.
+      </p>
+      </div>
+    </div>
+{% else %}
+
+      <div class="row col-md-offset-2">
+        <h3>Uploading patient size data to OpenREM</h3>
+      </div>
+
+      <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+      <p>
+        This function can only be accessed if you are logged in to OpenREM with admin
+        permissions.
+      </p>
+      </div>
+      </div>
+      
+{% endif %}
+
+
+{% endblock %}	

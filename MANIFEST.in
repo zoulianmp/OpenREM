@@ -1,0 +1,6 @@
+include LICENSE
+include README.rst
+include COPYING-GPLv3
+include CHANGES.rst
+recursive-include openrem *
+

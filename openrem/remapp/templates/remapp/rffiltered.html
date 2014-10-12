@@ -1,0 +1,106 @@
+{% extends "remapp/filteredbase.html" %}
+
+{% block navbar %}
+            <li><a href="/openrem/ct">CT</a></li>
+            <li class="active"><a href="/openrem/rf">Fluoroscopy</a></li>
+            <li><a href="/openrem/mg">Mammography</a></li>
+{% endblock %}
+
+{% block toprow %}
+{% load pagination_tags %}    
+      <p>
+        There are {{ filter.count }} studies in this list.
+      </p>
+        {% if admin.exportperm or admin.adminperm %}
+        <ul>
+          <li><a href="/openrem/exportflcsv1/?{{ request.GET.urlencode }}">Export to CSV</a> </li>
+        </ul>
+        {% else %}
+        <p>
+          Sorry, you don't have enough permissions to enable study export.
+        </p>
+        {% endif %}
+{% endblock %}
+
+
+
+{% block col2 %}
+
+
+    {{ studyfilter }}
+
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">Exam filter</h3>
+            </div>
+            <div class="panel-body">
+                <i>Date format yyyy-mm-dd</i>
+                <form action="" method="get" class="form-horizontal" role="form">
+                        {% for field in filter.form %}
+                            <div class="form-group">
+                                <div class="col-xs-4">
+                                    <label>{{ field.label_tag }}</label>
+                                </div>
+                                <div class="col-xs-8">
+                                  {{ field.errors }}
+                                  {{ field }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </table>
+                    <input type="submit" />
+                </form> 
+            </div>
+          </div>
+          
+<script>
+$('.datepicker').datepicker({
+    format: "yyyy-mm-dd",
+    autoclose: true,
+    todayHighlight: true
+    });
+</script>
+
+    
+{% endblock %}
+
+{% block col1 %}
+
+    {% autopaginate filter.qs 20 as filter_list %}
+    {% paginate %}
+
+    <table class="table table-striped">
+        <th>Institution</th><th>Unit</th><th>Date</th><th>Study description | Accession number</th><th>Number of events</th><th>DAP Total cGy.cm2</th><th>Dose at RP total Gy</th><th>Physician</th>
+        {% if admin.adminperm %}
+        <th>Delete?</th>
+        {% endif %}
+        {% for exam in filter_list %}
+        <tr>
+            <td>{{ exam.general_equipment_module_attributes_set.get.institution_name }}</td>
+            <td>
+                {{ exam.general_equipment_module_attributes_set.get.manufacturer }} |
+                {{ exam.general_equipment_module_attributes_set.get.manufacturer_model_name }} |
+                {{ exam.general_equipment_module_attributes_set.get.station_name }}        
+            </td>
+            <td>{{ exam.study_date|date:"Y-m-d" }} {{ exam.study_time|date:"H:i" }}</td>
+            <td>
+                <a href="/openrem/rf/{{ exam.id }}/">{{ exam.study_description }}</a> |
+                {{ exam.accession_number }}
+            </td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.irradiation_event_xray_data_set.count }}</td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.accumulated_xray_dose_set.get.accumulated_projection_xray_dose_set.get.convert_gym2_to_cgycm2|floatformat:1 }}</td>
+            <td>{{ exam.projection_xray_radiation_dose_set.get.accumulated_xray_dose_set.get.accumulated_projection_xray_dose_set.get.dose_rp_total|floatformat:6 }}</td>
+            <td>{{ exam.performing_physician_name }}</td>
+            {% if admin.adminperm %}
+            <td>
+              <a href="{% url 'study_delete' exam.id %}">Delete</a>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    {% paginate %}
+
+ 
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "remapp/base.html" %}
+
+{% block headextras %}
+{% if current %}
+<meta http-equiv="refresh" content="3" />
+{% endif %}
+{% endblock %}
+
+
+{% block navbar %}
+            <li><a href="/openrem/ct">CT</a></li>
+            <li><a href="/openrem/rf">Fluoroscopy</a></li>
+            <li><a href="/openrem/mg">Mammography</a></li>
+{% endblock %}
+
+{% block exportnav %}
+            <li class="active"><a href="/openrem/export">Exports</a></li>
+{% endblock %}
+
+
+
+{% block mainblock %}		
+   {% load humanize %}
+   {% load remappduration %}
+ 
+    {% if admin.exportperm or admin.adminperm %}
+
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.level == 40 %}danger{% elif message.level == 25 %}success{% endif %} fade in">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                {% if message.level == 40 %}
+                    <strong>Warning!</strong>
+                {% endif %}
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+    
+    {% if current %}
+    <h4>Export tasks in progress</h4>
+    <table class="table table-striped">
+        <th>Task ID</th><th>Exported</th><th>Modality</th><th>Export type</th><th>No. records</th><th>Progress</th><th></th>
+        {% for tsk in current %}
+        <tr>
+            <td>{{ tsk.task_id }}</td>
+            <td>{{ tsk.export_date|naturaltime }}</td>
+            <td>{{ tsk.modality }}</td>
+            <td>{{ tsk.export_type }}</td>
+            <td>{{ tsk.num_records }}</td>
+            <td>{{ tsk.progress }}</td>
+            <td><a href="/openrem/export/abort/{{ tsk.pk }}" class="btn btn-danger">Abort</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+
+    {% if errors %}
+    <h4>Export tasks in error state</h4>
+    <table class="table table-striped">
+        <th>Task ID</th><th>Exported</th><th>Modality</th><th>Export type</th><th>No. records</th><th>Error message</th><th></th>
+        {% for tsk in errors %}
+        <tr>
+            <td>{{ tsk.task_id }}</td>
+            <td>{{ tsk.export_date|naturaltime }}</td>
+            <td>{{ tsk.modality }}</td>
+            <td>{{ tsk.export_type }}</td>
+            <td>{{ tsk.num_records }}</td>
+            <td>{{ tsk.progress }}</td>
+            <td><a href="/openrem/export/abort/{{ tsk.pk }}" class="btn btn-default">Delete task</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+
+    <h4>Completed export tasks</h4>
+    <form action="/openrem/deletefile/" method="POST">
+    <table class="table table-striped">
+        <th>Exported</th><th>Modality</th><th>Export type</th><th>No. records</th><th>Export time</th><th>Download</th><th>Delete?</th>
+        {% for tsk in complete %}
+        <tr>
+            <td>{{ tsk.export_date|naturaltime }}</td>
+            <td>{{ tsk.modality }}</td>
+            <td>{{ tsk.export_type }}</td>
+            <td>{{ tsk.num_records }}</td>
+            <td>{{ tsk.processtime|naturalduration }} </td>
+            <td><a href="/openrem/download/{{ tsk.filename }}">{{ tsk.filename }}</a></td>
+            <td>
+                <div class = "checkbox">
+                    <label>
+                        <input type="checkbox" name="tsk{{ tsk.task_id }}" value="{{ tsk.task_id }}">
+                    </label>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="6"></td>
+            <td>
+            {% if complete.count > 0 %}
+                <button type="submit" class = "btn btn-default">Delete</button>
+            {% endif %}
+            </td>
+        </tr>
+    </table>
+    </form>
+
+        {% else %}
+        <p>
+          Sorry, you don't have enough permissions to enable study export.
+        </p>
+        {% endif %}
+    
+
+
+{% endblock %}	
+
+{% block jsblock %}
+
+
+ 
+ 
+{% endblock %}

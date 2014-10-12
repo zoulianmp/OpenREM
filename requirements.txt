@@ -1,0 +1,11 @@
+Django>=1.5
+South>=0.8.4
+XlsxWriter>=0.5.1
+argparse>=1.2.1
+distribute>=0.7.3
+django-filter>=0.7
+django-pagination>=1.0.7
+humanize>=0.5
+pydicom>=0.9.7
+pytz>=0a
+celery>=3.1

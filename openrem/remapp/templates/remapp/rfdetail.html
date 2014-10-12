@@ -1,0 +1,64 @@
+{% extends "remapp/base.html" %}
+
+{% block navbar %}
+            <li><a href="/openrem/ct">CT</a></li>
+            <li class="active"><a href="/openrem/rf">Fluoroscopy</a></li>
+            <li><a href="/openrem/mg">Mammography</a></li>
+{% endblock %}
+
+{% block mainblock %}		
+<h1>Detail list of events</h1>
+
+<ul>
+    <li>Accession number: {{ general_study_module_attributes.accession_number }}</li>
+    <li>Study date: {{ general_study_module_attributes.study_date }}</li>
+    <li>Study time: {{ general_study_module_attributes.study_time }}</li>
+    <li>Study description: {{ general_study_module_attributes.study_description }}</li>
+    <li>Requested procedure: {{ general_study_module_attributes.requested_procedure_code_meaning }}</li>
+    <li>Patient age: {{ general_study_module_attributes.patient_study_module_attributes_set.get.patient_age_decimal|floatformat:1 }}</li>
+    <li>Patient weight: {{ general_study_module_attributes.patient_study_module_attributes_set.get.patient_weight|floatformat:1 }} kg</li>
+    <li>Total DAP: {{ general_study_module_attributes.projection_xray_radiation_dose_set.get.accumulated_xray_dose_set.get.accumulated_projection_xray_dose_set.get.convert_gym2_to_cgycm2|floatformat:1 }} cGy.cm2</li>
+    <li>Total dose at RP: {{ general_study_module_attributes.projection_xray_radiation_dose_set.get.accumulated_xray_dose_set.get.accumulated_projection_xray_dose_set.get.dose_rp_total|floatformat:6 }} Gy</li>
+    <li>Hospital: {{ general_study_module_attributes.general_equipment_module_attributes_set.get.institution_name }}</li>
+    <li>
+        Scanner: 
+        {{ general_study_module_attributes.general_equipment_module_attributes_set.get.manufacturer }} |
+        {{ general_study_module_attributes.general_equipment_module_attributes_set.get.manufacturer_model_name }} |
+        {{ general_study_module_attributes.general_equipment_module_attributes_set.get.station_name }}        
+    </li>
+    <li>Study UID: {{ general_study_module_attributes.study_instance_uid }}</li>
+    <li>Test patient indicators? {{ general_study_module_attributes.patient_module_attributes_set.get.not_patient_indicator }}</li>
+</ul>
+
+
+<table class="table table-striped table-bordered">
+    <th>Time</th><th>Acquisition protocol</th><th>DAP cGy.cm2</th><th>Exposure time</th><th>kVp</th><th>mA</th><th>Angle</th><th>II Diameter</th>
+    {% for event in general_study_module_attributes.projection_xray_radiation_dose_set.get.irradiation_event_xray_data_set.all %}
+    <tr>
+        <td>{{ event.date_time_started|time:"H:i.s" }}</td>
+        <td>{{ event.acquisition_protocol }}</td>
+        <td>{{ event.convert_gym2_to_cgycm2|floatformat:3 }}</td>
+        <td>{{ event.irradiation_event_xray_source_data_set.get.exposure_time }}</td>
+        <td>{{ event.irradiation_event_xray_source_data_set.get.kvp_set.get.kvp }}</td>
+        <td>{{ event.irradiation_event_xray_source_data_set.get.xray_tube_current_set.get.xray_tube_current }}</td>
+        <td>{{ event.irradiation_event_xray_mechanical_data_set.get.positioner_primary_angle }}</td>
+        <td>{{ event.irradiation_event_xray_source_data_set.get.ii_field_size }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<a href="../list">Back to list</a>
+
+{% if is_paginated %}
+<p class="pagination">
+    {% if has_next %}
+    <a class="older" href="?page={{ next }}" title="View older posts">Older</a>
+    {% endif %}
+    {% if has_next and has_previous %} | {% endif %}
+    {% if has_previous %}
+    <a class="newer" href="?page={{ previous }}" title="View newer posts">Newer</a>
+    {% endif %}
+</p>
+{% endif %}
+
+{% endblock %}	
